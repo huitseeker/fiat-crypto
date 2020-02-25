@@ -37,7 +37,7 @@ pub type fiat_p224_i2 = i8;
 #[inline]
 pub fn fiat_p224_addcarryx_u32(out1: &mut u32, out2: &mut fiat_p224_u1, arg1: fiat_p224_u1, arg2: u32, arg3: u32) -> () {
   let x1: u64 = (((arg1 as u64) + (arg2 as u64)) + (arg3 as u64));
-  let x2: u64 = (x1 & (0xffffffff as u64));
+  let x2: u64 = (((x1 as u32) & 0xffffffff) as u64);
   let x3: fiat_p224_u1 = ((x1 >> 32) as fiat_p224_u1);
   *out1 = (x2 as u32);
   *out2 = x3;
@@ -61,9 +61,9 @@ pub fn fiat_p224_addcarryx_u32(out1: &mut u32, out2: &mut fiat_p224_u1, arg1: fi
 pub fn fiat_p224_subborrowx_u32(out1: &mut u32, out2: &mut fiat_p224_u1, arg1: fiat_p224_u1, arg2: u32, arg3: u32) -> () {
   let x1: i64 = (((arg2 as i64) - (arg1 as i64)) - (arg3 as i64));
   let x2: fiat_p224_i1 = ((x1 >> 32) as fiat_p224_i1);
-  let x3: i64 = (x1 & (0xffffffff as i64));
+  let x3: i64 = (((x1 as u32) & 0xffffffff) as i64);
   *out1 = (x3 as u32);
-  *out2 = (((0x0 as fiat_p224_i2) - (x2 as fiat_p224_i2)) as fiat_p224_u1);
+  *out2 = (((0x0 - (x2 as fiat_p224_u1)) as fiat_p224_i2) as fiat_p224_u1);
 }
 
 /*
@@ -82,7 +82,7 @@ pub fn fiat_p224_subborrowx_u32(out1: &mut u32, out2: &mut fiat_p224_u1, arg1: f
 #[inline]
 pub fn fiat_p224_mulx_u32(out1: &mut u32, out2: &mut u32, arg1: u32, arg2: u32) -> () {
   let x1: u64 = ((arg1 as u64) * (arg2 as u64));
-  let x2: u64 = (x1 & (0xffffffff as u64));
+  let x2: u64 = (((x1 as u32) & 0xffffffff) as u64);
   let x3: u32 = ((x1 >> 32) as u32);
   *out1 = (x2 as u32);
   *out2 = x3;
@@ -103,7 +103,7 @@ pub fn fiat_p224_mulx_u32(out1: &mut u32, out2: &mut u32, arg1: u32, arg2: u32) 
 #[inline]
 pub fn fiat_p224_cmovznz_u32(out1: &mut u32, arg1: fiat_p224_u1, arg2: u32, arg3: u32) -> () {
   let x1: fiat_p224_u1 = (!(!arg1));
-  let x2: i64 = ((((0x0 as fiat_p224_i2) - (x1 as fiat_p224_i2)) as i64) & (0xffffffff as i64));
+  let x2: i64 = ((((((0x0 as fiat_p224_i1) - (x1 as fiat_p224_i1)) as fiat_p224_i2) as u32) & 0xffffffff) as i64);
   let x3: u32 = (((x2 as u32) & arg3) | ((!(x2 as u32)) & arg2));
   *out1 = x3;
 }
@@ -2007,7 +2007,7 @@ pub fn fiat_p224_sub(out1: &mut [u32; 7], arg1: &[u32; 7], arg2: &[u32; 7]) -> (
   fiat_p224_cmovznz_u32(&mut x15, x14, (0x0 as u32), 0xffffffff);
   let mut x16: u32 = 0;
   let mut x17: fiat_p224_u1 = 0;
-  fiat_p224_addcarryx_u32(&mut x16, &mut x17, 0x0, x1, (x15 & (0x1 as u32)));
+  fiat_p224_addcarryx_u32(&mut x16, &mut x17, 0x0, x1, (((x15 as fiat_p224_u1) & 0x1) as u32));
   let mut x18: u32 = 0;
   let mut x19: fiat_p224_u1 = 0;
   fiat_p224_addcarryx_u32(&mut x18, &mut x19, x17, x3, (0x0 as u32));
@@ -2075,7 +2075,7 @@ pub fn fiat_p224_opp(out1: &mut [u32; 7], arg1: &[u32; 7]) -> () {
   fiat_p224_cmovznz_u32(&mut x15, x14, (0x0 as u32), 0xffffffff);
   let mut x16: u32 = 0;
   let mut x17: fiat_p224_u1 = 0;
-  fiat_p224_addcarryx_u32(&mut x16, &mut x17, 0x0, x1, (x15 & (0x1 as u32)));
+  fiat_p224_addcarryx_u32(&mut x16, &mut x17, 0x0, x1, (((x15 as fiat_p224_u1) & 0x1) as u32));
   let mut x18: u32 = 0;
   let mut x19: fiat_p224_u1 = 0;
   fiat_p224_addcarryx_u32(&mut x18, &mut x19, x17, x3, (0x0 as u32));
@@ -2723,53 +2723,53 @@ pub fn fiat_p224_to_bytes(out1: &mut [u8; 28], arg1: &[u32; 7]) -> () {
   let x6: u32 = (arg1[1]);
   let x7: u32 = (arg1[0]);
   let x8: u32 = (x7 >> 8);
-  let x9: u32 = (x7 & (0xff as u32));
+  let x9: u32 = (((x7 as u8) & 0xff) as u32);
   let x10: u32 = (x8 >> 8);
-  let x11: u32 = (x8 & (0xff as u32));
+  let x11: u32 = (((x8 as u8) & 0xff) as u32);
   let x12: u8 = ((x10 >> 8) as u8);
-  let x13: u32 = (x10 & (0xff as u32));
+  let x13: u32 = (((x10 as u8) & 0xff) as u32);
   let x14: u8 = (x12 & 0xff);
   let x15: u32 = (x6 >> 8);
-  let x16: u32 = (x6 & (0xff as u32));
+  let x16: u32 = (((x6 as u8) & 0xff) as u32);
   let x17: u32 = (x15 >> 8);
-  let x18: u32 = (x15 & (0xff as u32));
+  let x18: u32 = (((x15 as u8) & 0xff) as u32);
   let x19: u8 = ((x17 >> 8) as u8);
-  let x20: u32 = (x17 & (0xff as u32));
+  let x20: u32 = (((x17 as u8) & 0xff) as u32);
   let x21: u8 = (x19 & 0xff);
   let x22: u32 = (x5 >> 8);
-  let x23: u32 = (x5 & (0xff as u32));
+  let x23: u32 = (((x5 as u8) & 0xff) as u32);
   let x24: u32 = (x22 >> 8);
-  let x25: u32 = (x22 & (0xff as u32));
+  let x25: u32 = (((x22 as u8) & 0xff) as u32);
   let x26: u8 = ((x24 >> 8) as u8);
-  let x27: u32 = (x24 & (0xff as u32));
+  let x27: u32 = (((x24 as u8) & 0xff) as u32);
   let x28: u8 = (x26 & 0xff);
   let x29: u32 = (x4 >> 8);
-  let x30: u32 = (x4 & (0xff as u32));
+  let x30: u32 = (((x4 as u8) & 0xff) as u32);
   let x31: u32 = (x29 >> 8);
-  let x32: u32 = (x29 & (0xff as u32));
+  let x32: u32 = (((x29 as u8) & 0xff) as u32);
   let x33: u8 = ((x31 >> 8) as u8);
-  let x34: u32 = (x31 & (0xff as u32));
+  let x34: u32 = (((x31 as u8) & 0xff) as u32);
   let x35: u8 = (x33 & 0xff);
   let x36: u32 = (x3 >> 8);
-  let x37: u32 = (x3 & (0xff as u32));
+  let x37: u32 = (((x3 as u8) & 0xff) as u32);
   let x38: u32 = (x36 >> 8);
-  let x39: u32 = (x36 & (0xff as u32));
+  let x39: u32 = (((x36 as u8) & 0xff) as u32);
   let x40: u8 = ((x38 >> 8) as u8);
-  let x41: u32 = (x38 & (0xff as u32));
+  let x41: u32 = (((x38 as u8) & 0xff) as u32);
   let x42: u8 = (x40 & 0xff);
   let x43: u32 = (x2 >> 8);
-  let x44: u32 = (x2 & (0xff as u32));
+  let x44: u32 = (((x2 as u8) & 0xff) as u32);
   let x45: u32 = (x43 >> 8);
-  let x46: u32 = (x43 & (0xff as u32));
+  let x46: u32 = (((x43 as u8) & 0xff) as u32);
   let x47: u8 = ((x45 >> 8) as u8);
-  let x48: u32 = (x45 & (0xff as u32));
+  let x48: u32 = (((x45 as u8) & 0xff) as u32);
   let x49: u8 = (x47 & 0xff);
   let x50: u32 = (x1 >> 8);
-  let x51: u32 = (x1 & (0xff as u32));
+  let x51: u32 = (((x1 as u8) & 0xff) as u32);
   let x52: u32 = (x50 >> 8);
-  let x53: u32 = (x50 & (0xff as u32));
+  let x53: u32 = (((x50 as u8) & 0xff) as u32);
   let x54: u8 = ((x52 >> 8) as u8);
-  let x55: u32 = (x52 & (0xff as u32));
+  let x55: u32 = (((x52 as u8) & 0xff) as u32);
   out1[0] = (x9 as u8);
   out1[1] = (x11 as u8);
   out1[2] = (x13 as u8);
