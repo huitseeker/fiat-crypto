@@ -247,13 +247,14 @@ Module Rust.
     := fun idc desired_type '(t1, t2)
        => match desired_type with
           | Some desired_type
-           => if bin_op_commutes_with_mod_pow2 idc
-             then
-               (* these operations commute with mod, so we just pre-cast them *)
-               (None, (Some desired_type, Some desired_type))
-             else
-               let ct := ToString.int.union t1 t2 in
-               let desired_type' := Some (ToString.int.union ct desired_type) in
+            => let ct := ToString.int.union t1 t2 in
+              let desired_type' := Some (ToString.int.union ct desired_type) in
+              if bin_op_commutes_with_mod_pow2 idc
+              then
+                (* these operations commute with mod, so we just pre-cast them *)
+                (None, (desired_type', desired_type'))
+              else
+
                (Some desired_type,
                 (get_Zcast_up_if_needed desired_type' (Some t1),
                  get_Zcast_up_if_needed desired_type' (Some t2)))
