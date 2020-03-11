@@ -253,7 +253,7 @@ Module Rust.
               then
                 (* these operations commute with mod under modulo, so we just *)
                 (* pre-cast them to their upper bound with the desired type   *)
-                (desired_type', (Some desired_type, Some desired_type))
+                (Some desired_type, (Some desired_type, Some desired_type))
               else
 
                (Some desired_type,
